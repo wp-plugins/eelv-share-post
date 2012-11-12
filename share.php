@@ -3,7 +3,7 @@
 Plugin Name: EELV Share Post 
 Plugin URI: http://ecolosites.eelv.fr
 Description: create and share your text widgets in a multisites plateform
-Version: 0.1.0
+Version: 0.1.2
 Author: Bastien Ho (8457), Nathaniel Hayles // EELV
 License: CC BY-NC 3.0
 */
@@ -22,19 +22,27 @@ function eelv_mk_share(){
 	function get_blog_post_thumbnail($blog_id,$post_id){
 		global $wpdb;
 	  $base = $wpdb->base_prefix."".$blog_id."_posts";
+	  $basemeta = $wpdb->base_prefix."".$blog_id."_postmeta";
 	  if($matches[1]=='www'){
 		$base = $wpdb->base_prefix."posts";
+	  	$basemeta = $wpdb->base_prefix."postmeta";
 	  }
-	  $query="
-	  SELECT `guid`,`post_name` FROM ".$base." 
-	  WHERE post_parent = ".$post_id."
-	  AND post_type = 'attachment'
-	  AND post_mime_type LIKE'image/%'
+	  
+	  $querymeta="
+	  SELECT `meta_value` FROM ".$basemeta." 
+	  WHERE post_id = ".$post_id."
+	  AND meta_key = '_thumbnail_id'
 		LIMIT 0,1
 	  ";
-	   $thumb_query=$wpdb->get_row($query);
-		if(is_object($thumb_query)){
-		  return $thumb_query;
+	   $thumb_query_id=$wpdb->get_row($querymeta);
+		if(is_object($thumb_query_id)){
+		  $query="
+		  SELECT `guid`,`post_title` FROM ".$base." 
+		  WHERE ID = ".$thumb_query_id->meta_value;
+		   $thumb_query=$wpdb->get_row($query);
+			if(is_object($thumb_query)){
+			  return $thumb_query;
+			}
 		}
 		return false;
 	  }
@@ -69,15 +77,16 @@ function eelv_mk_share(){
 	//add_filter('get_the_excerpt', 'new_wp_trim_excerpt'); 
 	  
 	  $serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
+	wp_embed_register_handler( 'embedInMultiSite_p', '#<p>http://(.+)?'.$serv.'/\?p=(\d+)</p>#i', 'eelv_embed_locals' );
 	wp_embed_register_handler( 'embedInMultiSite', '#http://(.+)?'.$serv.'/\?p=(\d+)#i', 'eelv_embed_locals' );
 	wp_embed_register_handler( 'embedInMultiSite_link', '#(.+)??http://(.+)?'.$serv.'/\?p=(\d+)(.+)??>(.+)?</(.+)>#i', 'eelv_embed_locals' );
-	add_filter('the_excerpt','eelv_embed_exerpt');
+	add_filter('the_excerpt','eelv_embed_exerpt',999);
 	  //add_filter('excerpt_more','eelv_embed_exerpt');
 	add_filter('the_content_rss','eelv_embed_exerpt');
 	  
 	function eelv_embed_exerpt($excerpt){
 	  global $serv;
-	  
+	  $serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
 	  $sharer=false;
 	  $tumb='';
 	  
@@ -98,14 +107,14 @@ function eelv_mk_share(){
 			$blog = get_blog_details($blogname);    
 			$blog_post = get_blog_post( $blog->blog_id, $postid );
 		  }
-		  $tumb.='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
+		  $tumb='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
 		  if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-		  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
-		}
+			  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
+			}
 		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'>
-			<p>".substr(strip_tags(apply_filters('the_excerpt',$blog_post->post_content)),0,400)."...</p></div>";
-		  $excerpt=str_replace($match,$val,$excerpt);      
+		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...</p></div>";
+		  $excerpt=str_replace($match,$val,$excerpt); 
+		       
 		}
 	  }
 	  
@@ -126,14 +135,15 @@ function eelv_mk_share(){
 			$blog = get_blog_details($blogname);    
 			$blog_post = get_blog_post( $blog->blog_id, $postid );
 		  }
-		  $tumb.='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
+		 
+		  $tumb='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
 		   if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-		  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
-		}
+		  	$tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
+		   }
 		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'>
-			<p>".substr(strip_tags(apply_filters('the_excerpt',$blog_post->post_content)),0,400)."...</p></div>";
-		  $excerpt=str_replace($match,$val,$excerpt);      
+		  $val="<div class='embeelv_excerpt'>".$tumb."<p>".substr(strip_tags($blog_post->post_content),0,400)."...</p></div>";
+		  $excerpt=str_replace($match,$val,$excerpt); 
+		      
 		}
 	  }
 	  
@@ -214,7 +224,7 @@ function eelv_mk_share(){
 		$embed.=trim(str_replace('"','\"',$blog_post->post_title));
 		$embed.='[/h4][p]';
 		$embed.=trim(str_replace("
-","&nbsp;",str_replace('"','\"',substr(strip_tags(apply_filters('the_excerpt',$blog_post->post_content)),0,250))));
+","&nbsp;",str_replace('"','\"',substr(strip_tags($blog_post->post_content),0,250))));
 		if(isset($matches[3]) && !empty($matches[3])){
 		  $embed.='[/p][p]'.trim(str_replace("
 ","&nbsp;",str_replace('"','\"',strip_tags($matches[3]))));
