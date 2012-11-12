@@ -1,0 +1,29 @@
+/* CSS Document */
+/********************** EMBED */
+.embeelv{
+  background:#F6F6F6;
+  box-shadow:#DDD 0px 2px 10px;
+  padding:10px;
+  border-left:#7FB902 5px solid;
+}
+.embeelv p{
+  color:#777;
+}
+.embeelv p u{
+  color:#7FB902;
+}
+.embeelv img{
+  max-width:670px;
+  height:auto;
+}
+
+#wp-admin-bar-embed_post_menu .ab-icon{
+	background-image:url('img/share.png');
+	background-position:center left;
+	background-repeat:no-repeat;
+}
+#wp-admin-bar-embed_post_menu:hover .ab-icon{
+	background-image:url('img/share_on.png');
+	background-position:center left;
+	background-repeat:no-repeat;
+}

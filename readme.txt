@@ -1,0 +1,40 @@
+=== EELV My Widgets ===
+Contributors: 8457, ecolosites
+Donate link: 
+Tags: widgets
+Requires at least: 3.1
+Tested up to: 3.4
+Stable tag: /trunk
+License: CC BY-NC 3.0
+License URI: http://creativecommons.org/licenses/by-nc/3.0/
+
+Share a post link from a blog to another blog on the same WP multisite network and include the post content !
+
+== Description ==
+
+Juste share the short-link to display the original post. no more duplicate content, just sharing !
+
+== Installation ==
+
+1. Upload `eelv-share` to the `/wp-content/plugins/` directory
+1. Activate the plugin through the 'Plugins' menu in WordPress network admin
+
+== Frequently asked questions ==
+
+= Can I share on every blogs ? =
+
+no, the plugin just transfrom short-links into post preview. You have to be administrator, author, editor... on the blog sharing the link.
+
+== Screenshots ==
+
+http://ecolosites.eelv.fr/files/2012/11/share.png
+http://ecolosites.eelv.fr/files/2012/11/share2.png
+
+== Changelog ==
+
+0.1
+plugin creation
+
+== Upgrade notice ==
+
+No particular informations
