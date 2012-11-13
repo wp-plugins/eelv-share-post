@@ -3,7 +3,7 @@
 Plugin Name: EELV Share Post 
 Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
 Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
-Version: 0.1.3
+Version: 0.1.4
 Author: bastho, n4thaniel // EELV
 License: CC BY-NC 3.0
 */
@@ -90,11 +90,12 @@ function eelv_mk_share(){
 	  $serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
 	  $sharer=false;
 	  $tumb='';
-	  
+	  $original_thumbnail=has_post_thumbnail();
 	  // INTERNAL LINKS
 	  preg_match_all('#<a href="http://(.+)?'.$serv.'/\?p=(\d+)">(.+)?</a>#i',$excerpt,$out, PREG_PATTERN_ORDER); 
 	  if(is_array($out)){
 		$sharer=true;
+		$thumb_output=false;
 		foreach($out[0] as $id=>$match){
 		  $blogname = str_replace('.','',$out[1][$id]);
 		  $postid = $out[2][$id];
@@ -108,12 +109,15 @@ function eelv_mk_share(){
 			$blog = get_blog_details($blogname);    
 			$blog_post = get_blog_post( $blog->blog_id, $postid );
 		  }
-		  $tumb='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
-		  if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-			  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
-			}
+		  $link='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank"><span>&raquo;</span></a>';
+		  if( $original_thumbnail==false && $thumb_output==false){
+			  if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
+				  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'" class="embeelv_img"/>';
+				  $thumb_output=true;
+			  }
+		  }
 		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...</p></div>";
+		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...".$link."</p></div>";
 		  $excerpt=str_replace($match,$val,$excerpt); 
 		}
 	  }
@@ -122,6 +126,7 @@ function eelv_mk_share(){
 	  preg_match_all('#http://(.+)?'.$serv.'/\?p=(\d+)#i',$excerpt,$out, PREG_PATTERN_ORDER); 
 	  if(is_array($out)){
 		$sharer=true;
+		$thumb_output=false;
 		foreach($out[0] as $id=>$match){
 		  $blogname = str_replace('.','',$out[1][$id]);
 		  $postid = $out[2][$id];
@@ -136,15 +141,18 @@ function eelv_mk_share(){
 			$blog_post = get_blog_post( $blog->blog_id, $postid );
 		  }
 		 
-		  $tumb='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank">&raquo;</a>';
+		  $link='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank"><span>&raquo;</span></a>';
+		  if( $original_thumbnail==false && $thumb_output==false){
 		   if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-		  	$tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'"/>';
+		  	$tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'" class="embeelv_img"/>';
+			$thumb_output=true;
 		   }
+		  }
 		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'>".$tumb."<p>".substr(strip_tags($blog_post->post_content),0,400)."...</p></div>";
+		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...".$link."</p></div>";
 		  $excerpt=str_replace($match,$val,$excerpt); 
 		}
-	  }
+	  } 
 	  
 	  // YOUTUBE
 	   preg_match_all('#[\n\t\r\s]http://www\.youtube\.com/watch\?v=(.+)\&?(.+)?[\n\t\r\s]#i',$excerpt,$yout, PREG_PATTERN_ORDER); 
@@ -185,7 +193,7 @@ function eelv_mk_share(){
 	  if($sharer==false){
 		//$excerpt.="<a href=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='".$blogurl."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".$post->post_title."&s=".$post->guid."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)\">#</a>"; 
 	  }
-	  return $excerpt;	  
+	  return $tumb.$excerpt;	  
 	} 
 	
 	

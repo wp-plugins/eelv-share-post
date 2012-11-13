@@ -27,3 +27,13 @@
 	background-position:center left;
 	background-repeat:no-repeat;
 }
+
+.embeelv_blank{
+	display:inline-block;
+	width:17px;
+	height:15px;
+	background:url('img/link.png') no-repeat center center;	
+}
+.embeelv_blank span{
+	display:none;	
+}
