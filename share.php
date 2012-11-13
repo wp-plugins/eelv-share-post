@@ -4,7 +4,7 @@ Plugin Name: EELV Share Post
 Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
 Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
 Version: 0.1.2
-Author: Bastien Ho (8457), Nathaniel Hayles // EELV
+Author: bastho, n4thaniel // EELV
 License: CC BY-NC 3.0
 */
 
