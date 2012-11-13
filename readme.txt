@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+0.1.3
+fix : performances optimisation
+
 0.1.2
 fix : performances optimisation
 
