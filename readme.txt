@@ -1,4 +1,4 @@
-=== EELV Share POst ===
+=== EELV Share Post ===
 Contributors: 8457, ecolosites
 Donate link: 
 Tags: share, multisite, link, embed, SEO
