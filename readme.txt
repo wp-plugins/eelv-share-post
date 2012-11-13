@@ -16,14 +16,14 @@ Juste share the short-link to display the original post. no more duplicate conte
 
 == Installation ==
 
-1. Upload `eelv-share` to the `/wp-content/plugins/` directory
+1. Upload `eelv-share-post` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress network admin
 
 == Frequently asked questions ==
 
 = Can I share on every blogs ? =
 
-no, the plugin just transfrom short-links into post preview. You have to be administrator, author, editor... on the blog sharing the link.
+no, the plugin just transfrom short-links into post preview. You have to be administrator, author, editor... to post on a blog.
 
 == Screenshots ==
 
