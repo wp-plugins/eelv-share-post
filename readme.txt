@@ -1,7 +1,7 @@
-=== EELV My Widgets ===
+=== EELV Share POst ===
 Contributors: 8457, ecolosites
 Donate link: 
-Tags: widgets
+Tags: share, multisite, link, embed, SEO
 Requires at least: 3.1
 Tested up to: 3.4
 Stable tag: /trunk

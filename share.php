@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: EELV Share Post 
-Plugin URI: http://ecolosites.eelv.fr
-Description: create and share your text widgets in a multisites plateform
+Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
+Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
 Version: 0.1.2
 Author: Bastien Ho (8457), Nathaniel Hayles // EELV
 License: CC BY-NC 3.0
@@ -187,7 +187,7 @@ function eelv_mk_share(){
 	  //echo '<p>'.$tumb.'</p>';
 	  
 	  if($sharer==false){
-		// $excerpt.="<a href=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://demo.eelv.fr/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=EELV salue une décision de justice attendue concernant le chantier de la ligne THT Cotentin-Maine&s=http://eelv.fr/?p=61171&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)\"></a>"; 
+		// $excerpt.="<a href=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='".$blogurl."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".$post->post_title."&s=".$post->guid."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)\"></a>"; 
 	  }
 	  return $excerpt;
 	  
