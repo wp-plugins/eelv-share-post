@@ -32,18 +32,21 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
-0.1.4
-add : icon for extra-link in excerpt
-fix : only one thumbnail, if !has_post_thumbnail()
+= 0.1.5 =
+* fix : do not forget anymore the last site in the sharing list
 
-0.1.3
-fix : performances optimisation
+= 0.1.4 =
+* add : icon for extra-link in excerpt
+* fix : only one thumbnail, if !has_post_thumbnail()
 
-0.1.2
-fix : performances optimisation
+= 0.1.3 =
+* fix : performances optimisation
 
-0.1
-plugin creation
+= 0.1.2 =
+* fix : performances optimisation
+
+= 0.1 =
+* plugin creation
 
 == Upgrade notice ==
 
