@@ -17,7 +17,7 @@ Juste share the short-link to display the original post. no more duplicate conte
 == Installation ==
 
 1. Upload `eelv-share-post` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress network admin
+2. Activate the plugin through the 'Plugins' menu in WordPress network admin
 
 == Frequently asked questions ==
 
@@ -31,6 +31,12 @@ http://ecolosites.eelv.fr/files/2012/11/share.png
 http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
+
+= 0.2.0 =
+* Add : support for multi-domain-mapping
+* Add : options for preview length
+* Add : options for displaying youtube, dailymotion or twitter links
+* fix : performances optimisation
 
 = 0.1.5 =
 * fix : do not forget anymore the last site in the sharing list

@@ -3,7 +3,7 @@
 Plugin Name: EELV Share Post 
 Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
 Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
-Version: 0.1.5
+Version: 0.2.0
 Author: bastho, n4thaniel // EELV
 License: CC BY-NC 3.0
 */
@@ -18,122 +18,46 @@ function eelv_mk_share(){
 	load_plugin_textdomain( 'eelv-share-post', false, 'eelv-share-post/languages' );
 	
 	require( dirname( __FILE__ ) . '/htmlparser.php' );
+	require( dirname( __FILE__ ) . '/func.php' );
+	require( dirname( __FILE__ ) . '/admin.php' );
 	  
-	function get_blog_post_thumbnail($blog_id,$post_id){
-		global $wpdb;
-	  $base = $wpdb->base_prefix."".$blog_id."_posts";
-	  $basemeta = $wpdb->base_prefix."".$blog_id."_postmeta";
-	  if($matches[1]=='www'){
-		$base = $wpdb->base_prefix."posts";
-	  	$basemeta = $wpdb->base_prefix."postmeta";
-	  }
-	  
-	  $querymeta="
-	  SELECT `meta_value` FROM ".$basemeta." 
-	  WHERE post_id = ".$post_id."
-	  AND meta_key = '_thumbnail_id'
-		LIMIT 0,1
-	  ";
-	   $thumb_query_id=$wpdb->get_row($querymeta);
-		if(is_object($thumb_query_id)){
-		  $query="
-		  SELECT `guid`,`post_title` FROM ".$base." 
-		  WHERE ID = ".$thumb_query_id->meta_value;
-		   $thumb_query=$wpdb->get_row($query);
-			if(is_object($thumb_query)){
-			  return $thumb_query;
-			}
-		}
-		return false;
-	  }
-	  function new_wp_trim_excerpt($text) {  
-		$raw_excerpt = $text;  
-		if ( '' == $text ) {  
-			$text = get_the_content('');  
-	  
-			$text = strip_shortcodes( $text );  
-	  
-			$text = apply_filters('the_content', $text);  
-			$text = str_replace(']]>', ']]>', $text);  
-			$text = strip_tags($text, '<iframe>');  
-			$excerpt_length = apply_filters('excerpt_length', 55);  
-	  
-			$excerpt_more = apply_filters('excerpt_more', ' ' . '[...]');  
-			$words = preg_split('/(<a.*?a>)|\n|\r|\t|\s/', $text, $excerpt_length + 1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE );  
-			if ( count($words) > $excerpt_length ) {  
-				array_pop($words);  
-				$text = implode(' ', $words);  
-				$text = $text . $excerpt_more;  
-			} else {  
-				$text = implode(' ', $words);  
-			}  
-		}  
-		return apply_filters('new_wp_trim_excerpt', $text, $raw_excerpt);  
-	  
-	}  
-	
-/* IN THE LOOP */	
-	
+
+/* IN THE LOOP */		
 		
 	remove_filter('get_the_excerpt', 'wp_trim_excerpt');
 	remove_filter('get_the_excerpt', 'wp_trim_excerpt',100);  
-	//add_filter('get_the_excerpt', 'new_wp_trim_excerpt'); 
-	  
-	  $serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
-	  
+	//add_filter('get_the_excerpt', 'new_wp_trim_excerpt'); 	
+	
 	add_filter('the_excerpt','eelv_embed_exerpt',999);
 	//add_filter('excerpt_more','eelv_embed_exerpt');
 	add_filter('the_content_rss','eelv_embed_exerpt');
 	  
 	function eelv_embed_exerpt($excerpt){
-	  global $serv;
-	  $serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
+	  $eelv_share_domains=eelv_share_get_domains();
 	  $sharer=false;
 	  $tumb='';
 	  $original_thumbnail=has_post_thumbnail();
-	  // INTERNAL LINKS
-	  preg_match_all('#<a href="http://(.+)?'.$serv.'/\?p=(\d+)">(.+)?</a>#i',$excerpt,$out, PREG_PATTERN_ORDER); 
-	  if(is_array($out)){
-		$sharer=true;
-		$thumb_output=false;
-		foreach($out[0] as $id=>$match){
-		  $blogname = str_replace('.','',$out[1][$id]);
-		  $postid = $out[2][$id];
-		  if(empty($blogname)){
-			//$matches[1]=$matches[2];    
-			$blogname='www';
-			$blog = get_blog_details(1);
-			$blog_post = get_blog_post( 1, $postid );
-		  }
-		  else{
-			$blog = get_blog_details($blogname);    
-			$blog_post = get_blog_post( $blog->blog_id, $postid );
-		  }
-		  $link='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank"><span>&raquo;</span></a>';
-		  if( $original_thumbnail==false && $thumb_output==false){
-			  if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-				  $tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'" class="embeelv_img"/>';
-				  $thumb_output=true;
-			  }
-		  }
-		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...".$link."</p></div>";
-		  $excerpt=str_replace($match,$val,$excerpt); 
-		}
+	  
+	  
+   	  $eelv_share_options = get_option( 'eelv_share_options');
+	  if(!isset($eelv_share_options['l']) || $eelv_share_options['l']==0 || empty($eelv_share_options['l'])){
+		$eelv_share_options['l']=400;  
 	  }
 	  
 	  // INTERNAL LINKS REFERENCES
-	  preg_match_all('#http://(.+)?'.$serv.'/\?p=(\d+)#i',$excerpt,$out, PREG_PATTERN_ORDER); 
+	  preg_match_all('#http://(.+)?('.implode('|',$eelv_share_domains).')/\?p=(\d+)(\&.+)?#i',$excerpt,$out, PREG_PATTERN_ORDER); 
 	  if(is_array($out)){
 		$sharer=true;
 		$thumb_output=false;
 		foreach($out[0] as $id=>$match){
-		  $blogname = str_replace('.','',$out[1][$id]);
-		  $postid = $out[2][$id];
-		  if(empty($blogname)){
-			//$matches[1]=$matches[2];    
+		  $blogname = substr($out[1][$id],0,-1);
+		  $domain = $out[2][$id];
+		  $postid = $out[3][$id];
+		  parse_str( $out[4][$id],$vars);
+		  
+		  if(empty($blogname)){  
 			$blogname='www';
-			$blog = get_blog_details(1);
+			$blog = get_blog_details($domain);
 			$blog_post = get_blog_post( 1, $postid );
 		  }
 		  else{
@@ -141,57 +65,47 @@ function eelv_mk_share(){
 			$blog_post = get_blog_post( $blog->blog_id, $postid );
 		  }
 		 
-		  $link='<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank"><span>&raquo;</span></a>';
-		  if( $original_thumbnail==false && $thumb_output==false){
-		   if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
-		  	$tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'" class="embeelv_img"/>';
-			$thumb_output=true;
-		   }
+		  
+		  // THUMBNAIL
+		  if(isset($eelv_share_options['i']) && $eelv_share_options['i']==1){
+			  if( $original_thumbnail==false && $thumb_output==false){
+			   if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
+				$tumb.='<img src="'.$image->guid.'" alt="'.$image->post_name.'" class="embeelv_img"/>';
+				$thumb_output=true;
+			   }
+			  }
 		  }
-		//<h4>&laquo;".$blog_post->post_title."&raquo;</h4>
-		  $val="<div class='embeelv_excerpt'><p>".substr(strip_tags($blog_post->post_content),0,400)."...".$link."</p></div>";
+		  $content = substr(strip_tags($blog_post->post_content),0,$eelv_share_options['l']).'...';
+		  $val="<div class='embeelv_excerpt'><p>";
+		  if(isset($eelv_share_options['a']) && $eelv_share_options['a']==1){
+			  $val.='<a href="'.$blog_post->guid.'" target="_blank"class="embeelv_direct_blank">'.$content.'</a>';
+		  }
+		  else{
+		  	$val.=$content.'<a href="'.$blog_post->guid.'" target="_blank" class="embeelv_blank"><span>&raquo;</span></a>';
+		  }
+		  $val.="</p></div>";
 		  $excerpt=str_replace($match,$val,$excerpt); 
 		}
 	  } 
 	  
 	  // YOUTUBE
-	   preg_match_all('#[\n\t\r\s]http://www\.youtube\.com/watch\?v=(.+)\&?(.+)?[\n\t\r\s]#i',$excerpt,$yout, PREG_PATTERN_ORDER); 
-	  if(is_array($yout)){
-		foreach($yout[0] as $id=>$match){
-		  
-		  $val="<iframe class='embeelv_iframe' src='http://www.youtube.com/embed/".$yout[1][$id]."' width='250' height='150'>video</iframe>";
-		  $tumb.= $val;
-		  $excerpt=str_replace($match,strip_tags($val),$excerpt);      
-		}
+	  if(isset($eelv_share_options['y']) && $eelv_share_options['y']==1){
+		   $tumb.=eelv_share_parse_youtube($excerpt);
 	  }
 	  
 	  // DAILYMOTION
-	  preg_match_all('#[\n\t\r\s]http://www\.dailymotion\.com/video/(.+)_?(.+)?[\n\t\r\s]#i',$excerpt,$dail, PREG_PATTERN_ORDER); 
-	  if(is_array($dail)){
-		foreach($dail[0] as $id=>$match){      
-		  $val="<iframe class='embeelv_iframe' src='http://www.dailymotion.com/embed/video/".$dail[1][$id]."' width='250' height='150'>video</iframe>";
-		  $tumb.= $val;
-		  $excerpt=str_replace($match,strip_tags($val),$excerpt);      
-		}
-	  }
-	  
+	  if(isset($eelv_share_options['d']) && $eelv_share_options['d']==1){
+		  $tumb.=eelv_share_parse_dailymotion($excerpt);
+	  }	  
 	  
 	  // TWITTER
-	  preg_match_all('#[\n\t\r\s]https?://twitter\.com/(.+)/status/(.+)[\n\t\r\s]#i',$excerpt,$twi, PREG_PATTERN_ORDER); 
-	  if(is_array($twi)){
-		foreach($twi[0] as $id=>$match){ 
-		  
-		  $twit = json_decode(file_get_contents('https://api.twitter.com/1/statuses/oembed.json?id='.$twi[2][$id].'&omit_script=true&hide_media=true&hide_thread=true&lang=fr'));
-		 $parser = new htmlParser($twit->html);
-	$twitxt = $parser->toArray();
-		  $val="<div class='embeelv_twit'>@".$twi[1][$id]." &laquo;".$twitxt[0]['innerHTML']."&raquo;</div>";
-		  $excerpt=str_replace($match,$val,$excerpt);      
-		}
+	  if(isset($eelv_share_options['t']) && $eelv_share_options['t']==1){
+		  $excerpt=eelv_share_parse_twitter($excerpt);
 	  }
 	  
 	  
 	  if($sharer==false){
-		//$excerpt.="<a href=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='".$blogurl."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".$post->post_title."&s=".$post->guid."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)\">#</a>"; 
+		/*$excerpt.="<a href=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='".$blogurl."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".$post->post_title."&s=".$post->guid."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)\">#</a>"; */
 	  }
 	  return $tumb.$excerpt;	  
 	} 
@@ -201,34 +115,54 @@ function eelv_mk_share(){
 	
 	
 /* SINGLE PAGE */	
+	$eelv_share_domains=eelv_share_get_domains();  
 	
-	wp_embed_register_handler( 'embedInMultiSite_p', '/<p[^>]*>http:\/\/(.+)?'.$serv.'\/\?p=(\d+)<\/p>/i', 'eelv_embed_locals' );
-	wp_embed_register_handler( 'embedInMultiSite', '#http://(.+)?'.$serv.'/\?p=(\d+)#i', 'eelv_embed_locals' );
-	/*wp_embed_register_handler( 'embedInMultiSite_link', '#(.+)??http://(.+)?'.$serv.'/\?p=(\d+)(.+)??>(.+)?</(.+)>#i', 'eelv_embed_locals' );*/
+
+	foreach($eelv_share_domains as $domain){		
+		wp_embed_register_handler( 'embedInMultiSite_p', '/<p[^>]*>http:\/\/(.+)?('.$domain.')\/\?p=(\d+)(\&.+)?<\/p>/i', 'eelv_embed_locals' );
+		wp_embed_register_handler( 'embedInMultiSite', '#http://(.+)?('.$domain.')/\?p=(\d+)(\&.+)?#i', 'eelv_embed_locals' );
+		/*wp_embed_register_handler( 'embedInMultiSite_link', '#(.+)??http://(.+)?'.$domain.'/\?p=(\d+)(.+)??>(.+)?</(.+)>#i', 'eelv_embed_locals' );*/
+	}
 	
 	function eelv_embed_locals( $matches, $attr, $url, $rawattr ) {
-	  $matches[1]=str_replace('.','',$matches[1]);
-	  if(empty($matches[1])){
-		//$matches[1]=$matches[2];    
-		$matches[1]='www';
-		$blog = get_blog_details(1);
-		$blog_post = get_blog_post( 1, $matches[2] );
-	  }
-	  else{
-		$blog = get_blog_details($matches[1]);    
-		$blog_post = get_blog_post( $blog->blog_id, $matches[2] );
+	  global $eelv_share_domains;
+	  
+	  // init values
+	  $subdomain=substr($matches[1],0,-1);
+	  $domain=$matches[2];
+	  $postid=$matches[3];
+	  parse_str($matches[4],$vars);
+	  $eelv_share_options = get_option( 'eelv_share_options');
+	  
+	  // init vars
+	  $max_words=55;
+	  if(isset($vars['s']) && is_numeric($vars['s'])){
+			$max_words=$vars['s'];  
 	  }
 	  
-	  //echo $query."**";
-	  //print_r( $thumb_query);
+	  	  
+	  //$subdomain=str_replace('.','',$subdomain);
+	  if(empty($subdomain)){
+		//$subdomain=$domain;    
+		$subdomain='www';
+		$blog = get_blog_details($domain);
+		$blog_post = get_blog_post( 1, $postid );
+	  }
+	  else{
+		$blog = get_blog_details($subdomain);    
+		$blog_post = get_blog_post( $blog->blog_id, $postid );
+	  }
 	 
 	  global $it;
 	  $it=abs($it);
-	  $embed='<!--'.$matches[2].'@'.$matches[1].'--><div class="embeelv">';
-	  $embed.='<a href="'.$blog_post->guid.'" target="_blank" id="'.$matches[2].'_'.$it.'_'.$matches[1].'">';
+	  $js_var='str_'.$postid.'_'.$it.'_'.$subdomain;
+	  $it++;  
+	  
+	  $embed='<div class="embeelv">';
+	  $embed.='<a href="'.$blog_post->guid.'" target="_blank" id="'.$js_var.'">';
 	  $embed.=$blog_post->post_name;
 	  $embed.='</a></div>';
-	  $embed.='<script>var str_'.$matches[2].'_'.$it.'_'.$matches[1].'="';
+	  $embed.='<script>var '.$js_var.'="';
 	  if(is_object($blog_post)){
 		if(false !== $image = get_blog_post_thumbnail($blog->blog_id,$blog_post->ID)){
 		  $embed.='[img src=\"'.$image->guid.'\" alt=\"'.$image->post_name.'\"/]';
@@ -239,33 +173,41 @@ function eelv_mk_share(){
 		
 		$w=0;
 		$txt = trim(strip_tags($blog_post->post_content));
-		$txts=explode("\n",$txt);
+		$txts=preg_split('/\s/',$txt);
 		
 		$emtxt='';
 		foreach($txts as $str){
 			$str=str_replace('"','\"',trim($str));	
-			$w+=strlen($str);
+			$w++;
 			$emtxt.=$str.' ';
-			if($w>250) break;
+			if($max_words>0 && $w>$max_words) break;
 		}
-		if(strlen($txt)>$emtxt) $emtxt.='...';
+		// YOUTUBE
+		  if(isset($eelv_share_options['y']) && $eelv_share_options['y']==1){
+			   $emtxt=eelv_share_untag(eelv_share_parse_youtube($emtxt,true));
+		  }
+		  
+		  // DAILYMOTION
+		  if(isset($eelv_share_options['d']) && $eelv_share_options['d']==1){
+			  $emtxt=eelv_share_untag(eelv_share_parse_dailymotion($emtxt,true));
+		  }	  
+		  
+		  // TWITTER
+		  if(isset($eelv_share_options['t']) && $eelv_share_options['t']==1){
+			  $emtxt=eelv_share_untag(eelv_share_parse_twitter($emtxt));
+		  }
+		if(sizeof($txts)>$w) $emtxt.='...';
 		$embed.=$emtxt;
 		
-		//$embed.=trim(str_replace(array("","\n",),array('&nbsp;','&nbsp;',),substr(strip_tags($blog_post->post_content),0,250)));
-		if(isset($matches[3]) && !empty($matches[3])){
-		  $embed.='[/p][p]'.trim(str_replace("
-","&nbsp;",str_replace('"','\"',strip_tags($matches[3]))));
-		}
 		$embed.='[/p][p][u]'.$blog_post->guid.'[/u][div style=\"clear:both\"][/div][/p]';
 	  }
 	  else{
 		$embed.='[h4 class=\"nondispo\"]'.__('This post isn\'t avaible any more','eelv-share-post').'[/h4]';
 	  }
 	  $embed.='";';
-	  $embed.='while(str_'.$matches[2].'_'.$it.'_'.$matches[1].'.indexOf("[") != -1){str_'.$matches[2].'_'.$it.'_'.$matches[1].' = str_'.$matches[2].'_'.$it.'_'.$matches[1].'.replace("[","<");}';
-	  $embed.='while (str_'.$matches[2].'_'.$it.'_'.$matches[1].'.indexOf("]") != -1){str_'.$matches[2].'_'.$it.'_'.$matches[1].' = str_'.$matches[2].'_'.$it.'_'.$matches[1].'.replace("]",">");}';
-	  $embed.='document.getElementById("'.$matches[2].'_'.$it.'_'.$matches[1].'").innerHTML=str_'.$matches[2].'_'.$it.'_'.$matches[1].';document.getElementById("wp-admin-bar-embed_post_menu").style.display="none";</script>';
-	  $it++;  
+	  $embed.='while('.$js_var.'.indexOf("[") != -1){'.$js_var.' = '.$js_var.'.replace("[","<");}';
+	  $embed.='while ('.$js_var.'.indexOf("]") != -1){'.$js_var.' = '.$js_var.'.replace("]",">");}';
+	  $embed.='document.getElementById("'.$js_var.'").innerHTML='.$js_var.'; setTimeout(function(){document.getElementById("wp-admin-bar-embed_post_menu").style.display="none";},2000);</script>';
 	  return $embed;
 	}
 
@@ -289,7 +231,7 @@ function eelv_embed_post( $wp_admin_bar ) {
 	  foreach ($user_blogs as $user_blog) {
 	   $wp_admin_bar->add_node($args);
 		$html="<a class='ab-item' onclick=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$user_blog->domain ."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".get_the_title()."&s=".wp_get_shortlink()."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 10); else a();void(0)\">".$user_blog->blogname."</a>";
-		$args = array('html'=>$html,'id' => $n, 'title' => $user_blog->blogname, 'parent' => 'embed_post_menu', 'href'=> '?sharecontent=yes&site='.$user_blog->domain); 
+		$args = array('html'=>$html,'id' => $n, 'title' => $user_blog->blogname, 'parent' => 'embed_post_menu', 'href'=> '?sharecontent=yes&site='.$user_blog->domain.'&blog='.$user_blog->userblog_id ); 
 	   
 		$wp_admin_bar->add_node($args);	
 		$n++; 
@@ -305,16 +247,25 @@ function eelv_share_on_page(){
 		$title=get_the_title();
 		
 		$site=$_REQUEST['site'];
+		$blog_dest=$_REQUEST['blog'];
 		$blog_id=get_current_blog_id();
 		$blog_details = get_blog_details($blog_id);
+
 		$domain=$blog_details->siteurl;
 		
 		$post_id=get_the_ID();
 		
 		$link=$domain.'/?p='.$post_id;
-		//echo $link;
+		
+		$tmp_blog_id=get_current_blog_id();
+		switch_to_blog($blog_dest);
+			$eelv_share_options = get_option('eelv_share_options');
+		switch_to_blog($tmp_blog_id);
+		if(isset($eelv_share_options['s']) && is_numeric($eelv_share_options['s'])){
+			$link.='%26s='.$eelv_share_options['s'];  
+		 }
 	echo '<script>';	
-	echo"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$site."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".str_replace(array("&rsquo;"),array("\\'"),$title)."&s=...%0A%0A".$link."%0A&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)";  
+	echo"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$site."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".str_replace(array("&rsquo;"),array("\\'"),$title)."&s=%20%20%0A%0A".$link."%0A&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)";  
    echo'</script>';
   }	
 }

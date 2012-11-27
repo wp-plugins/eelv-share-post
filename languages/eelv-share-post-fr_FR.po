@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: EELV Share Post\n"
-"POT-Creation-Date: 2012-11-06 15:52+0100\n"
-"PO-Revision-Date: 2012-11-06 15:53+0100\n"
+"POT-Creation-Date: 2012-11-27 17:51+0100\n"
+"PO-Revision-Date: 2012-11-27 18:05+0100\n"
 "Last-Translator: Bastien HO <bastienho@urbancube.fr>\n"
 "Language-Team: ecolosites <ecolosites@eelv.fr>\n"
 "Language: fr\n"
@@ -17,10 +17,89 @@ msgstr ""
 "X-Poedit-SearchPath-1: ..\n"
 "X-Poedit-SearchPath-2: ..\n"
 
-#: ../share.php:220
+#: ../admin.php:5 ../admin.php:19 ../admin.php:113 ../admin.php:128
+msgid "Post sharing"
+msgstr "Partage d'article"
+
+#: ../admin.php:12 ../admin.php:121
+msgid "Options saved"
+msgstr "Options sauvegard&eacute;es"
+
+#: ../admin.php:28
+msgid "Default values"
+msgstr "Valeurs par d&eacute;faut"
+
+#: ../admin.php:34
+msgid "Default values for text length to display :"
+msgstr "Valeur par d&eacute;faut pour la longueur du texte &agrave; afficher"
+
+#: ../admin.php:37
+msgid ""
+"Can be modified for each post ex: http://eelv.fr?p=[$post_ID]&s=[$size] "
+"where $size is the number of words to display. Value 0 shows all the text, "
+"default is 55 words"
+msgstr ""
+"Peut &ecirc;tre modifi&eacute; pour chaque article ex : http://eelv.fr?p="
+"[$ID_article]&s=[$longueur] o&ugrave; $longueur est le nombre de mots "
+"&agrave; afficher. La valeur 0 affiche tout le texte, la valeur par d&eacute;"
+"faut est de 55 mots"
+
+#: ../admin.php:43
+msgid "Configuration"
+msgstr "Configuration"
+
+#: ../admin.php:49
+msgid "number of caracters to display in the loop :"
+msgstr "nombre de caract&egrave;res &agrave; afficher dans la boucle :"
+
+#: ../admin.php:52
+msgid "default is 400"
+msgstr "valeur par d&eacute;faut 400"
+
+#: ../admin.php:57
+msgid "Open target post directly from the loop"
+msgstr "Ouvrir l'article cible directement depuis la boucle"
+
+#: ../admin.php:64
+msgid "Display post thumbnail in the loop"
+msgstr "Afficher l'image &agrave; la une dans la boucle"
+
+#: ../admin.php:71
+msgid "Display youtube links"
+msgstr "Afficher les liens youtube"
+
+#: ../admin.php:78
+msgid "Display dailymotion links"
+msgstr "Afficher les liens dailymotion"
+
+#: ../admin.php:85
+msgid "Display twitter links"
+msgstr "Afficher les liens twitter"
+
+#: ../admin.php:95 ../admin.php:153
+msgid "Save changes"
+msgstr "Sauvegarder les modifications"
+
+#: ../admin.php:137
+msgid "Configuration "
+msgstr "Configuration"
+
+#: ../admin.php:143
+msgid "Other domains to parse :"
+msgstr "Autres domaines à analyser :"
+
+#: ../admin.php:146
+msgid ""
+"Use it for network domain mapping, comma separated values ex : eelv.fr,"
+"urbancube.fr"
+msgstr ""
+"Utiliser pour le mappage de domaines sur un r&eacute;seau, valeurs s&eacute;"
+"par&eacute;es par une virgule ex: eelv.fr,urbancube.fr"
+
+#: ../share.php:205
 msgid "This post isn't avaible any more"
 msgstr "Cet article n'est plus disponible"
 
-#: ../share.php:239
+#: ../share.php:223
 msgid "Share on"
 msgstr "Publier sur"
