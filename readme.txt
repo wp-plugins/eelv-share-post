@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.2.1 =
+* Fix : domain names with "-" or "." causing js bug
+
 = 0.2.0 =
 * Add : support for multi-domain-mapping
 * Add : options for preview length
