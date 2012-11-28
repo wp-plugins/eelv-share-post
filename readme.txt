@@ -12,7 +12,7 @@ Share a post link from a blog to another blog on the same WP multisite network a
 
 == Description ==
 
-Juste share the short-link to display the original post. no more duplicate content, just sharing !
+Just share the short-link to display the original post. no more duplicate content, just sharing !
 
 == Installation ==
 
