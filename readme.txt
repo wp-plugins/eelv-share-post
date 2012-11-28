@@ -1,7 +1,7 @@
 === EELV Share Post ===
 Contributors: bastho, n4thaniel, ecolosites
 Donate link: 
-Tags: share, multisite, link, embed, SEO
+Tags: Post,share,embed,posts,links,multisites,SEO
 Requires at least: 3.1
 Tested up to: 3.4
 Stable tag: /trunk
