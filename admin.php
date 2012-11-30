@@ -18,7 +18,7 @@ function eelv_share_configuration(){
         <div id="icon-edit" class="icon32"><br/></div>
         <h2><?=_e('Post sharing', 'eelv-share-post' )?></h2>
         
-    <form name="typeSite" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">  
+    <form name="eelv_share_option_form" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">  
     <input type="hidden" name="type" value="update">
     
         
@@ -114,8 +114,14 @@ function eelv_share_ajout_network_menu() {
 }
 
 function eelv_share_network_configuration(){
-  if( $_REQUEST[ 'type' ] == 'update' ) {    
-      update_site_option( 'eelv_share_domains', explode(',',str_replace(' ','',$_REQUEST['eelv_share_domains'])) );
+  if( $_REQUEST[ 'type' ] == 'update' ) { 
+  		$eelv_share_domains=array();
+  		foreach ($_REQUEST['eelv_share_domains'] as $domain){
+	  		if(!empty($domain[0]) && !empty($domain[1])){
+				$eelv_share_domains[]=$domain;
+			}
+  		}
+      update_site_option( 'eelv_share_domains', $eelv_share_domains );
 	       
       ?>
       <div class="updated"><p><strong><?php _e('Options saved', 'eelv-share-post' ); ?></strong></p></div>
@@ -127,30 +133,81 @@ function eelv_share_network_configuration(){
         <div id="icon-edit" class="icon32"><br/></div>
         <h2><?=_e('Post sharing', 'eelv-share-post' )?></h2>
         
-    <form name="typeSite" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">  
+    <form name="eelv_share_net_option_form" id="eelv_share_net_option_form" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">  
     <input type="hidden" name="type" value="update">
     
         
         <table class="widefat" style="margin-top: 1em;">
             <thead>
                 <tr>
-                  <th scope="col" colspan="2"><?= __( 'Configuration ', 'menu-config' ) ?></th>
+                  <th scope="col" colspan="2"><?= __( 'Configuration ', 'eelv-share-post' ) ?></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td width="30%">
                         <label for="eelv_share_domains"><?=_e('Other domains to parse :', 'eelv-share-post' )?></label>
+                        <legend><?=_e('Use it for network domain mapping', 'eelv-share-post' )?></legend>
                     </td><td>
-                        <input  type="text" name="eelv_share_domains"  size="60"  id="eelv_share_domains"  value="<?=implode(',',$eelv_share_domains)?>" class="wide">
-                        <legend><?=_e('Use it for network domain mapping, comma separated values ex : eelv.fr,urbancube.fr', 'eelv-share-post' )?></legend>
+                    	<table>
+                           <thead>
+                                <tr>
+                                  <th scope="col"><?php _e( 'External domain', 'eelv-share-post' ) ?></th>
+                                  <th scope="col" colspan="2"><?php _e( 'Wordpress domain', 'eelv-share-post' ) ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="eelv_share_domains_list">
+                            	<?php $i=0; foreach ($eelv_share_domains as $domain){ ?>
+									<?php if(is_string($domain)) $domain = array($domain,$domain); ?>
+                                    <tr>
+                                      <td scope="col"><input type="text" id="eelv_share_domains_ext_<?=$i?>" name="eelv_share_domains[<?=$i?>][0]" value="<?=$domain[0]?>" class="wide" size="36"/></td>
+                                      <td scope="col"><input type="text" id="eelv_share_domains_int_<?=$i?>" name="eelv_share_domains[<?=$i?>][1]" value="<?=$domain[1]?>" class="wide" size="36"/></td>
+                                      <td scope="col"><a class="button" data-id="<?=$i?>">X</a></td>
+                                    </tr>
+								<?php $i++; } ?>
+                            </tbody>
+                            <tfoot>
+                            	<tr>
+                                	<td colspan="3">
+                                    <a id="eelv_share_add_domain" class="button"><?php _e( 'Add a domain', 'eelv-share-post' ) ?></a>
+                                    <script>
+									var i=<?=$i?>;
+									function delbuttons(){
+										jQuery('#eelv_share_domains_list a').click(function(){
+											var id = jQuery(this).data('id');
+											jQuery('#eelv_share_domains_ext_'+id).attr('value','');
+											jQuery('#eelv_share_domains_int_'+id).attr('value','');
+											jQuery('#eelv_share_net_option_form').submit();
+										});
+									}
+									jQuery(document).ready(function(e) {
+                                        jQuery('#eelv_share_add_domain').click(function(){
+											jQuery('#eelv_share_domains_list').append('<tr><td scope="col"><input type="text" id="eelv_share_domains_ext_'+i+'" name="eelv_share_domains['+i+'][0]" value="" class="wide" size="26"/></td><td scope="col"><input type="text" id="eelv_share_domains_int_'+i+'" name="eelv_share_domains['+i+'][1]" value="" class="wide" size="26"/></td><td scope="col"><a class="button" data-id="'+i+'">X</a></td></tr>');
+											i++;
+											delbuttons();
+										});
+										delbuttons();
+                                    });
+									</script>
+                                    </td>
+                                 </tr>
+                            	<tr>
+                                  <td scope="col">ex: urbancube.fr</td>
+                                  <td scope="col" colspan="2">eelv</td>
+                                </tr>
+                                <tr>
+                                  <td colspan="3"><?php _e('for final blog url : ', 'eelv-share-post' ) ?> <u>eelv.<?=DOMAIN_CURRENT_SITE?></u> = <u>urbancube.fr</u></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        
                    </td>
                  </tr>
                      
                  <tr>
                     <td colspan="2">
                         <p class="submit">
-                        <input type="submit" name="Submit" value="<?php _e('Save changes', 'eelv-share-post' ) ?>" />
+                        <input type="submit" name="Submit" value="<?php _e('Save changes', 'eelv-share-post' ) ?>" class="button-primary" />
                         </p>                    
                     </td>
                 </tr>

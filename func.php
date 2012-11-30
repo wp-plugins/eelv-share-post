@@ -1,9 +1,13 @@
 <?php
 function eelv_share_get_domains(){
-	$serv = str_replace('.','\.',DOMAIN_CURRENT_SITE);
 	$eelv_share_domains = get_site_option( 'eelv_share_domains' ,array(), true);
-	$eelv_share_domains[]=$serv;
-	return $eelv_share_domains;
+	$domains_map=array();
+	foreach ($eelv_share_domains as $domain){ 
+	 if(is_string($domain)) $domain = array($domain,$domain);
+	 $domains_map[$domain[0]]=$domain[1];
+	}
+	$domains_map[DOMAIN_CURRENT_SITE]=DOMAIN_CURRENT_SITE;
+	return $domains_map;
 }
 	
 	

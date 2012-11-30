@@ -3,8 +3,9 @@
 Plugin Name: EELV Share Post 
 Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
 Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
-Version: 0.2.1
+Version: 0.2.2
 Author: bastho, n4thaniel // EELV
+Author URI: http://ecolosites.eelv.fr/
 License: CC BY-NC 3.0
 */
 
@@ -44,9 +45,12 @@ function eelv_mk_share(){
 		$eelv_share_options['l']=400;  
 	  }
 	  
+	  $domains_to_parse=array_keys($eelv_share_domains);
+
 	  // INTERNAL LINKS REFERENCES
-	  preg_match_all('#http://(.+)?('.implode('|',$eelv_share_domains).')/\?p=(\d+)(\&.+)?#i',$excerpt,$out, PREG_PATTERN_ORDER); 
+	  preg_match_all('#http://([a-zA-Z0-9\-\.]+)?('.str_replace('.','\.',implode('|',$domains_to_parse)).')/\?p=(\d+)(\&[a-zA-Z0-9=\&]+)?[\n\t\s ]#i',$excerpt,$out, PREG_PATTERN_ORDER); 
 	  if(is_array($out)){
+		  
 		$sharer=true;
 		$thumb_output=false;
 		foreach($out[0] as $id=>$match){
@@ -55,6 +59,9 @@ function eelv_mk_share(){
 		  $postid = $out[3][$id];
 		  parse_str( $out[4][$id],$vars);
 		  
+		  if(isset($eelv_share_domains[$domain]) && $domain!=$eelv_share_domains[$domain]){
+			$blogname= $eelv_share_domains[$domain];
+		  }
 		  if(empty($blogname)){  
 			$blogname='www';
 			$blog = get_blog_details($domain);
@@ -118,14 +125,14 @@ function eelv_mk_share(){
 	$eelv_share_domains=eelv_share_get_domains();  
 	
 
-	foreach($eelv_share_domains as $domain){		
-		wp_embed_register_handler( 'embedInMultiSite_p', '/<p[^>]*>http:\/\/(.+)?('.$domain.')\/\?p=(\d+)(\&.+)?<\/p>/i', 'eelv_embed_locals' );
-		wp_embed_register_handler( 'embedInMultiSite', '#http://(.+)?('.$domain.')/\?p=(\d+)(\&.+)?#i', 'eelv_embed_locals' );
-		/*wp_embed_register_handler( 'embedInMultiSite_link', '#(.+)??http://(.+)?'.$domain.'/\?p=(\d+)(.+)??>(.+)?</(.+)>#i', 'eelv_embed_locals' );*/
+	foreach($eelv_share_domains as $domain=>$internal_domain){	
+		$id_domain = str_replace(array('.','-'),'',$domain);
+		wp_embed_register_handler( 'embedInMultiSite_'.$id_domain.'_p', '/<p[^>]*>http:\/\/(.+)?('.str_replace('.','\.',$domain).')\/\?p=(\d+)(\&.+)?<\/p>/i', 'eelv_embed_locals');
+		wp_embed_register_handler( 'embedInMultiSite_'.$id_domain, '#http://(.+)?('.str_replace('.','\.',$domain).')/\?p=(\d+)(\&.+)?#i', 'eelv_embed_locals' );
 	}
 	
 	function eelv_embed_locals( $matches, $attr, $url, $rawattr ) {
-	  global $eelv_share_domains;
+	   
 	  
 	  // init values
 	  $subdomain=substr($matches[1],0,-1);
@@ -133,15 +140,19 @@ function eelv_mk_share(){
 	  $postid=$matches[3];
 	  parse_str($matches[4],$vars);
 	  $eelv_share_options = get_option( 'eelv_share_options');
-	  
+	  $eelv_share_domains=eelv_share_get_domains();
 	  // init vars
 	  $max_words=55;
 	  if(isset($vars['s']) && is_numeric($vars['s'])){
 			$max_words=$vars['s'];  
 	  }
 	  
-	  	  
-	  //$subdomain=str_replace('.','',$subdomain);
+	  
+	  if(isset($eelv_share_domains[$domain]) && $domain!=$eelv_share_domains[$domain]){
+	  	$subdomain= $eelv_share_domains[$domain];
+	  }
+	  
+	  
 	  if(empty($subdomain)){
 		//$subdomain=$domain;    
 		$subdomain='www';
