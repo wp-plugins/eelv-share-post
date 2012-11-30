@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: EELV Share Post\n"
-"POT-Creation-Date: 2012-11-27 17:51+0100\n"
-"PO-Revision-Date: 2012-11-27 18:05+0100\n"
+"POT-Creation-Date: 2012-11-30 17:46+0100\n"
+"PO-Revision-Date: 2012-11-30 17:47+0100\n"
 "Last-Translator: Bastien HO <bastienho@urbancube.fr>\n"
 "Language-Team: ecolosites <ecolosites@eelv.fr>\n"
 "Language: fr\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Poedit-SearchPath-1: ..\n"
 "X-Poedit-SearchPath-2: ..\n"
 
-#: ../admin.php:5 ../admin.php:19 ../admin.php:113 ../admin.php:128
+#: ../admin.php:5 ../admin.php:19 ../admin.php:113 ../admin.php:134
 msgid "Post sharing"
 msgstr "Partage d'article"
 
-#: ../admin.php:12 ../admin.php:121
+#: ../admin.php:12 ../admin.php:127
 msgid "Options saved"
 msgstr "Options sauvegard&eacute;es"
 
@@ -76,30 +76,49 @@ msgstr "Afficher les liens dailymotion"
 msgid "Display twitter links"
 msgstr "Afficher les liens twitter"
 
-#: ../admin.php:95 ../admin.php:153
+#: ../admin.php:95 ../admin.php:210
 msgid "Save changes"
 msgstr "Sauvegarder les modifications"
 
-#: ../admin.php:137
+#: ../admin.php:143
 msgid "Configuration "
 msgstr "Configuration"
 
-#: ../admin.php:143
+#: ../admin.php:149
 msgid "Other domains to parse :"
 msgstr "Autres domaines à analyser :"
 
-#: ../admin.php:146
-msgid ""
-"Use it for network domain mapping, comma separated values ex : eelv.fr,"
-"urbancube.fr"
-msgstr ""
-"Utiliser pour le mappage de domaines sur un r&eacute;seau, valeurs s&eacute;"
-"par&eacute;es par une virgule ex: eelv.fr,urbancube.fr"
+#: ../admin.php:150
+msgid "Use it for network domain mapping"
+msgstr "A utiliser pour la mappage de domaines"
 
-#: ../share.php:205
+#: ../admin.php:155
+msgid "External domain"
+msgstr "Domaine externe"
+
+#: ../admin.php:156
+msgid "Wordpress domain"
+msgstr "Domaine dans wordpress"
+
+#: ../admin.php:172
+msgid "Add a domain"
+msgstr "Ajouter un domaine"
+
+#: ../admin.php:199
+msgid "for final blog url : "
+msgstr "pour l'adresse finale :"
+
+#: ../share.php:216
 msgid "This post isn't avaible any more"
 msgstr "Cet article n'est plus disponible"
 
-#: ../share.php:223
+#: ../share.php:234
 msgid "Share on"
 msgstr "Publier sur"
+
+#~ msgid ""
+#~ "Use it for network domain mapping, comma separated values ex : eelv.fr,"
+#~ "urbancube.fr"
+#~ msgstr ""
+#~ "Utiliser pour le mappage de domaines sur un r&eacute;seau, valeurs "
+#~ "s&eacute;par&eacute;es par une virgule ex: eelv.fr,urbancube.fr"
