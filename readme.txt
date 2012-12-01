@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.2.3 =
+* Fix : CSS fix and enhancement
+
 = 0.2.2 =
 * Add : new network-admin GUI for domain mapping
 * Fix : multi-domain-mapping working properly

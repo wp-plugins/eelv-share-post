@@ -210,7 +210,9 @@ function eelv_mk_share(){
 		if(sizeof($txts)>$w) $emtxt.='...';
 		$embed.=$emtxt;
 		
-		$embed.='[/p][p][u]'.$blog_post->guid.'[/u][div style=\"clear:both\"][/div][/p]';
+		$embed.='[/p]';
+		if(sizeof($txts)>$w) $embed.='[p][u]'.__('&raquo; Read full post','eelv-share-post').'[/u]';
+		$embed.='[div style=\"clear:both\"][/div][/p]';
 	  }
 	  else{
 		$embed.='[h4 class=\"nondispo\"]'.__('This post isn\'t avaible any more','eelv-share-post').'[/h4]';
