@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.3.0 =
+* Add : manage sharing on edit page, select categories on each blog
+
 = 0.2.3 =
 * Fix : CSS fix and enhancement
 

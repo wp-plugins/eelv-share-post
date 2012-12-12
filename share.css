@@ -47,3 +47,8 @@
 .embeelv_blank span{
 	display:none;	
 }
+/******/
+#eelv_share_from_admin select{
+	width:80%;
+	margin-left:10%;
+}
