@@ -3,7 +3,7 @@
 Plugin Name: EELV Share Post 
 Plugin URI: http://ecolosites.eelv.fr/eelv-share-post/
 Description: Share a post link from a blog to another blog on the same WP multisite network and include the post content !
-Version: 0.3.0
+Version: 0.4.0
 Author: bastho, n4thaniel // EELV
 Author URI: http://ecolosites.eelv.fr/
 License: CC BY-NC 3.0
@@ -337,6 +337,8 @@ function eelv_share_save_postdata($post_id){
 	$shared_on=get_post_meta($post_id,'share_on_blog',true);
 	$share_on=$_REQUEST['share_on_blog'];
 	$share_tmp=array();
+	if(!is_array($shared_on)) $shared_on=array($shared_on);
+	if(!is_array($share_on)) $share_on=array($share_on);
 	
 	
 	$user_id = get_current_user_id(); 
@@ -381,15 +383,20 @@ function eelv_embed_post( $wp_admin_bar ) {
     $args = array('id' => 'embed_post_menu', 'title' => '<span class="ab-icon"></span> <span class="ab-label">'.__('Share on','eelv-share-post').'</span>'); 
 	$wp_admin_bar->add_node($args);
   
-  
+  $n=0;
   $user_id = get_current_user_id(); 
   $cb=get_current_blog_id();
   $user_blogs = get_blogs_of_user( $user_id ); 
   // add a child item to a our parent item
 	  foreach ($user_blogs as $user_blog) {
 	   $wp_admin_bar->add_node($args);
-		$html="<a class='ab-item' onclick=\"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$user_blog->domain ."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".get_the_title()."&s=".wp_get_shortlink()."&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 10); else a();void(0)\">".$user_blog->blogname."</a>";
-		$args = array('html'=>$html,'id' => $n, 'title' => $user_blog->blogname, 'parent' => 'embed_post_menu', 'href'=> '?sharecontent=yes&site='.$user_blog->domain.'&blog='.$user_blog->userblog_id ); 
+		$args = array(
+			'id' => $n, 
+			'title' => $user_blog->blogname, 
+			'parent' => 'embed_post_menu', 
+			'target'=>'_blank',
+			'href'=> 'http://'.$user_blog->domain.'/wp-admin/press-this.php?u=&t='.urlencode(get_the_title()).'&s=%20%20%0A%0A'.eelv_share_mk_link($user_blog->blog_id,get_the_ID()).'%0A&v=4' 
+		); 
 	   
 		$wp_admin_bar->add_node($args);	
 		$n++; 
@@ -397,6 +404,19 @@ function eelv_embed_post( $wp_admin_bar ) {
     
   }
 }
+
+function eelv_share_load_js() {
+	wp_enqueue_script(
+		'share',
+		plugins_url('/share.js', __FILE__),
+		array('jquery'),
+		false,
+		false
+	);
+}    
+ 
+add_action('wp_enqueue_scripts', 'eelv_share_load_js');
+
 
 function eelv_share_mk_link($blog_dest,$post_id,$encode=true){
 	$blog_id=get_current_blog_id();
@@ -416,8 +436,10 @@ function eelv_share_mk_link($blog_dest,$post_id,$encode=true){
 	}
 	return $link;
 }
- 
-add_action( 'wp_footer', 'eelv_share_on_page', 999 );
+
+// obsolete function
+//add_action( 'wp_footer', 'eelv_share_on_page', 999 );
+/*
 function eelv_share_on_page(){
 	$sharecontent=$_REQUEST['sharecontent'];
 	if(isset($sharecontent)){
@@ -429,7 +451,7 @@ function eelv_share_on_page(){
 		
 		$link=eelv_share_mk_link($blog_dest,$post_id);
 	echo '<script>';	
-	echo"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$site."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".str_replace(array("&rsquo;"),array("\\'"),$title)."&s=%20%20%0A%0A".$link."%0A&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)";  
+	echo"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$site."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".str_replace(array("&rsquo;",'"'),array("\\'",''),$title)."&s=%20%20%0A%0A".$link."%0A&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)";  
    echo'</script>';
   }	
-}
+}*/

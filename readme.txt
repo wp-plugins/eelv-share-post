@@ -32,6 +32,10 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.4.0 =
+* Add : improve sharing action : no more page refresh (Requires jQuery)
+* Fix : PHP Warning:  array_key_exists()
+
 = 0.3.0 =
 * Add : manage sharing on edit page, select categories on each blog
 
