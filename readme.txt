@@ -3,7 +3,7 @@ Contributors: bastho, n4thaniel, ecolosites
 Donate link: 
 Tags: Post,share,embed,posts,links,multisites,SEO
 Requires at least: 3.1
-Tested up to: 3.4
+Tested up to: 3.6.1
 Stable tag: /trunk
 License: CC BY-NC 3.0
 License URI: http://creativecommons.org/licenses/by-nc/3.0/
@@ -31,6 +31,9 @@ http://ecolosites.eelv.fr/files/2012/11/share.png
 http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
+
+= 0.4.1 =
+* Fix : Replace deprecated capability
 
 = 0.4.0 =
 * Add : improve sharing action : no more page refresh (Requires jQuery)

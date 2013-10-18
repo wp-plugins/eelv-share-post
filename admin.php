@@ -2,7 +2,7 @@
 /********************** ADMIN SETTINGS */
 add_action( 'admin_menu', 'eelv_share_ajout_menu');
 function eelv_share_ajout_menu() {
-	add_submenu_page('options-general.php',__('Post sharing', 'eelv-share-post' ), __('Post sharing', 'eelv-share-post' ), 7, 'eelv_share_configuration', 'eelv_share_configuration');
+	add_submenu_page('options-general.php',__('Post sharing', 'eelv-share-post' ), __('Post sharing', 'eelv-share-post' ), 'manage_options', 'eelv_share_configuration', 'eelv_share_configuration');
 }
 function eelv_share_configuration(){
   if( $_REQUEST[ 'type' ] == 'update' ) {    
