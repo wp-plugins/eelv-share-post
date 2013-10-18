@@ -7,6 +7,7 @@ Version: 0.4.1
 Author: bastho, n4thaniel // EELV
 Author URI: http://ecolosites.eelv.fr/
 License: CC BY-NC 3.0
+Network: 1
 */
 
 add_action( 'wp_head', 'eelv_share_css' );

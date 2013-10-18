@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.4.2 =
+* Fix : Add a network wide restriction
+
 = 0.4.1 =
 * Fix : Replace deprecated capability
 
