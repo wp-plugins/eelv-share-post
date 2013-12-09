@@ -32,6 +32,9 @@ http://ecolosites.eelv.fr/files/2012/11/share2.png
 
 == Changelog ==
 
+= 0.4.3 =
+* Fix : extends the_excerpt filter to get_the_excerpt to match more themes
+
 = 0.4.2 =
 * Fix : Add a network wide restriction
 
