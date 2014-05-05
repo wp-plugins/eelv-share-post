@@ -27,15 +27,9 @@
   border:none;
 }
 
-#wp-admin-bar-embed_post_menu .ab-icon{
-	background-image:url('img/share.png');
-	background-position:center left;
-	background-repeat:no-repeat;
-}
-#wp-admin-bar-embed_post_menu:hover .ab-icon{
-	background-image:url('img/share_on.png');
-	background-position:center left;
-	background-repeat:no-repeat;
+#wp-admin-bar-embed_post_menu .ab-icon:before{
+	content:'';
+	top:2px;
 }
 
 .embeelv_blank{

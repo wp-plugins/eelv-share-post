@@ -3,7 +3,7 @@ Contributors: bastho, n4thaniel, ecolosites
 Donate link: 
 Tags: Post,share,embed,posts,links,multisites,SEO
 Requires at least: 3.1
-Tested up to: 3.8.1
+Tested up to: 3.6.1
 Stable tag: /trunk
 License: CC BY-NC 3.0
 License URI: http://creativecommons.org/licenses/by-nc/3.0/

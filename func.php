@@ -10,7 +10,13 @@ function eelv_share_get_domains(){
 	return $domains_map;
 }
 	
-	
+
+/*
+ * Thumbnails tools
+ * 
+ * 
+ * 
+ */
 function get_blog_post_thumbnail($blog_id,$post_id){
   global $wpdb;
 	$base = $wpdb->base_prefix."".$blog_id."_posts";
@@ -38,6 +44,51 @@ function get_blog_post_thumbnail($blog_id,$post_id){
   }
   return false;
 }
+
+
+
+function eelv_distant_thumbnail($html, $post_id, $post_thumbnail_id, $size, $attr){
+	$distant_thumbnail_post_id = get_post_meta($post_id,'_thumbnail_from_shared_post',true);
+	$distant_thumbnail_blog_id = get_post_meta($post_id,'_thumbnail_from_shared_blog',true);
+	
+	if($distant_thumbnail_post_id && $distant_thumbnail_blog_id){
+		remove_filter( "post_thumbnail_html", 'eelv_distant_thumbnail',30);
+		switch_to_blog($distant_thumbnail_blog_id);
+		$html=get_the_post_thumbnail($distant_thumbnail_post_id,$size,$attr);
+		restore_current_blog();
+		add_filter( "post_thumbnail_html", 'eelv_distant_thumbnail',30,5);
+	}
+	return $html;
+}
+function eelv_admin_thumbnail( $content, $post_id ){
+	$distant_thumbnail_post_id = get_post_meta($post_id,'_thumbnail_from_shared_post',true);
+	$distant_thumbnail_blog_id = get_post_meta($post_id,'_thumbnail_from_shared_blog',true);
+	
+	if($distant_thumbnail_post_id && $distant_thumbnail_blog_id){
+		switch_to_blog($distant_thumbnail_blog_id);
+		$content.='<label>
+		<p>
+		   <input type="checkbox" name="eelv_share_featured_image" id="eelv_share_featured_image" value="'.$distant_thumbnail_post_id.'" checked="checked">
+		   '.__( 'Synchronise featured image from distant post','eelv-share-post').'
+		</p>
+		'.get_the_post_thumbnail($distant_thumbnail_post_id,'thumb').'
+	</label>
+	<input type="hidden" name="eelv_share_featured_image_keep" value="1">';
+		restore_current_blog();
+	}
+	return $content;
+}
+
+
+
+/*
+ * Text parsers
+ * 
+ * 
+ * 
+ * 
+ */
+
 function eelv_share_untag($str){
 	return trim(str_replace(array('<','>',"\\r\\n",'"'),array('[',']',' ','\''),$str));
 }

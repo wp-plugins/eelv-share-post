@@ -10,13 +10,52 @@ License: CC BY-NC 3.0
 Network: 1
 */
 
-add_action( 'wp_head', 'eelv_share_css' );
-add_action( 'admin_head', 'eelv_share_css' );
-function eelv_share_css(){
-	echo '<link type="text/css" rel="stylesheet" href="' . WP_PLUGIN_URL . '/eelv-share-post/share.css" />' . "\n";
-}
-
 add_action( 'init', 'eelv_mk_share' );
+
+add_action( 'wp_enqueue_scripts', 'eelv_share_load_script' );
+add_action( 'admin_enqueue_scripts', 'eelv_share_load_admin_script' );
+
+
+add_action( 'admin_head', 'eelv_share_admin_head'); 
+
+add_filter( "post_thumbnail_html", 'eelv_distant_thumbnail',30,5);
+add_filter( 'admin_post_thumbnail_html', 'eelv_admin_thumbnail',30,2 );
+
+add_action( 'admin_bar_menu', 'eelv_embed_post', 999 );
+add_action( 'add_meta_boxes', 'eelv_share_add_custom_box' );
+
+
+add_action( 'admin_footer', 'eelv_share_admin_foot');
+add_action( 'save_post', 'eelv_share_save_postdata' );
+
+
+function eelv_share_load_script(){
+	wp_enqueue_style(
+		'eelv_share_post', 
+		plugins_url('/share.css', __FILE__), 
+		false, 
+		null	
+	);
+	wp_enqueue_script(
+		'share',
+		plugins_url('/share.js', __FILE__),
+		array('jquery'),
+		false,
+		false
+	);
+} 
+function eelv_share_load_admin_script() {
+	wp_enqueue_script(
+		'share-admin',
+		plugins_url('/share-admin.js', __FILE__),
+		array('jquery'),
+		false,
+		false
+	);
+} 
+
+
+
 function eelv_mk_share(){
 	load_plugin_textdomain( 'eelv-share-post', false, 'eelv-share-post/languages' );
 	
@@ -232,9 +271,9 @@ function eelv_mk_share(){
 
 /************************** SHARING ACTIONS ***/
 
-add_action( 'add_meta_boxes', 'eelv_share_add_custom_box' );
+
 function eelv_share_add_custom_box() {
-add_meta_box( 
+	add_meta_box( 
       'eelv_share_from_admin',
       __( "Share on", 'eelv-share-post' ),
       'eelv_share_from_admin',
@@ -286,7 +325,7 @@ function eelv_share_from_admin(){
 	  </script>
       <?php
 }
-add_action( 'admin_head', 'eelv_share_admin_head');
+
 function eelv_share_admin_head(){
 	if ($_SERVER['PHP_SELF']=='/wp-admin/press-this.php') {
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )      return;	
@@ -326,13 +365,28 @@ function eelv_share_admin_head(){
 		}
 	}
 }
-		
-add_action( 'save_post', 'eelv_share_save_postdata' );
+
 function eelv_share_save_postdata($post_id){
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )      return;
 	if ( wp_is_post_revision( $post_id ) ) return;
-	if(!wp_verify_nonce($_POST['eelv_share_post_via_admin'],'eelv_share_post_via_admin')) return;
-	 
+	if(
+		!wp_verify_nonce($_POST['eelv_share_post_via_admin'],'eelv_share_post_via_admin')
+		&&
+		!wp_verify_nonce($_POST['_wpnonce'],'press-this')
+	) return;
+	
+	if(isset($_POST['eelv_share_featured_image']) && isset($_POST['eelv_share_featured_image_blogid'])){
+		update_post_meta($post_id,'_thumbnail_from_shared_post',$_POST['eelv_share_featured_image']);
+		update_post_meta($post_id,'_thumbnail_from_shared_blog',$_POST['eelv_share_featured_image_blogid']);
+		update_post_meta( $post_id, '_thumbnail_id', 1);
+		return;
+	}
+	elseif(isset($_POST['eelv_share_featured_image_keep']) && !isset($_POST['eelv_share_featured_image'])){
+		delete_post_meta($post_id,'_thumbnail_from_shared_post');
+		delete_post_meta($post_id,'_thumbnail_from_shared_blog');
+	}
+	
+	if(isset($_POST['share_on_blog']) ){
 	remove_action( 'save_post', 'eelv_share_save_postdata' );
 	
 	$shared_on=get_post_meta($post_id,'share_on_blog',true);
@@ -375,9 +429,9 @@ function eelv_share_save_postdata($post_id){
 	}}
 	add_action( 'save_post', 'eelv_share_save_postdata' );
 	update_post_meta($post_id,'share_on_blog',$share_tmp,$shared_on);
+	}
 }
 
-add_action( 'admin_bar_menu', 'eelv_embed_post', 999 );
 function eelv_embed_post( $wp_admin_bar ) {
   if(is_single()){
     // add a parent item
@@ -396,7 +450,7 @@ function eelv_embed_post( $wp_admin_bar ) {
 			'title' => $user_blog->blogname, 
 			'parent' => 'embed_post_menu', 
 			'target'=>'_blank',
-			'href'=> 'http://'.$user_blog->domain.'/wp-admin/press-this.php?u=&t='.urlencode(get_the_title()).'&s=%20%20%0A%0A'.eelv_share_mk_link($user_blog->blog_id,get_the_ID()).'%0A&v=4' 
+			'href'=> 'http://'.$user_blog->domain.'/wp-admin/press-this.php?p='.get_the_ID().'&t='.urlencode(get_the_title()).'&s=%20%20%0A%0A'.eelv_share_mk_link($user_blog->userblog_id,get_the_ID()).'%0A&v=4&b='.$cb 
 		); 
 	   
 		$wp_admin_bar->add_node($args);	
@@ -406,17 +460,8 @@ function eelv_embed_post( $wp_admin_bar ) {
   }
 }
 
-function eelv_share_load_js() {
-	wp_enqueue_script(
-		'share',
-		plugins_url('/share.js', __FILE__),
-		array('jquery'),
-		false,
-		false
-	);
-}    
- 
-add_action('wp_enqueue_scripts', 'eelv_share_load_js');
+   
+
 
 
 function eelv_share_mk_link($blog_dest,$post_id,$encode=true){
@@ -438,21 +483,39 @@ function eelv_share_mk_link($blog_dest,$post_id,$encode=true){
 	return $link;
 }
 
-// obsolete function
-//add_action( 'wp_footer', 'eelv_share_on_page', 999 );
-/*
-function eelv_share_on_page(){
-	$sharecontent=$_REQUEST['sharecontent'];
-	if(isset($sharecontent)){
-		$title=get_the_title();
-		
-		$site=$_REQUEST['site'];
-		$blog_dest=$_REQUEST['blog'];
-		$post_id=get_the_ID();
-		
-		$link=eelv_share_mk_link($blog_dest,$post_id);
-	echo '<script>';	
-	echo"var d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://".$site."/wp-admin/press-this.php',l=d.location,e=encodeURIComponent,u=f+'?u=&t=".str_replace(array("&rsquo;",'"'),array("\\'",''),$title)."&s=%20%20%0A%0A".$link."%0A&v=4';a=function(){if(!w.open(u,'t','toolbar=0,resizable=1,scrollbars=1,status=1,width=720,height=570'));};if (/Firefox/.test(navigator.userAgent)) setTimeout(a, 0); else a();void(0)";  
-   echo'</script>';
-  }	
-}*/
+function eelv_share_admin_foot(){
+	if ($_SERVER['PHP_SELF']=='/wp-admin/press-this.php') {
+		if(isset($_REQUEST['p']) && isset($_REQUEST['v']) && isset($_REQUEST['t']) && isset($_REQUEST['b'])){
+			
+			if(!is_numeric($_REQUEST['p'])) return;
+			if(!is_numeric($_REQUEST['b'])) return;
+			
+			remove_filter( "post_thumbnail_html", 'eelv_distant_thumbnail',30);
+			
+			$postid=$_REQUEST['p'];
+			$blogid=$_REQUEST['b'];
+			switch_to_blog($blogid);
+		   
+		     if(has_post_thumbnail($postid)){
+      			?>
+             <div id="eelv_share_featured_image" class="postbox">
+				<div class="handlediv" title="<>"><br></div>
+				<h3 class="hndle"><?php _e( 'Featured image') ?> <?php echo $file; ?></h3>
+				<div class="inside">
+					<label>
+						<p>
+							<input type="checkbox" name="eelv_share_featured_image" id="eelv_share_featured_image" value="<?=$postid?>" checked="checked">
+							<?php _e( 'Synchronise featured image from distant post','eelv-share-post') ?> 
+						</p>
+						<?php echo get_the_post_thumbnail($postid,'thumb') ?>
+					</label>
+					<input type="hidden" name="eelv_share_featured_image_blogid" value="<?=$blogid?>">
+							
+				</div>
+			</div>				
+			 <?php 
+			}
+			restore_current_blog();
+		}
+	}
+}
